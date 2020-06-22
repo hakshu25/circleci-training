@@ -9,7 +9,7 @@ class BooksController < ApplicationController
 
   def create
     if Book.create!(book_params)
-      redirect_to '/books'
+      redirect_to books_path
     else
       render :new
     end
