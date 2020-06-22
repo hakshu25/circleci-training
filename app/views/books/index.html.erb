@@ -1,7 +1,11 @@
 <h1>Books List</h1>
 <ul>
   <% @books.each do |book| %>
-    <li><%= book.title %><%= link_to 'Edit', edit_book_path(book.id) %></li>
+    <li>
+      <%= book.title %>
+      <%= link_to 'Edit', edit_book_path(book.id) %>
+      <%= link_to 'Delete', "/books/#{book.id}", method: :delete %>
+    </li>
   <% end %>
 </ul>
 <%= link_to 'Add a book', new_book_path %>
