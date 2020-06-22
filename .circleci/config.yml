@@ -10,4 +10,9 @@ jobs:
           command: |
             echo 'Hello World!'
             echo 'This is the delivery pipeline'
+      - run:
+          name: コードの取得
+          command: |
+            ls -la
+            echo '^^^That should look familiar^^^'
 
