@@ -1,0 +1,8 @@
+<h1>Add a book</h1>
+<%= form_with model: @book do |f| %>
+  <%= f.text_field :title %>
+  <%= f.submit %>
+<% end %>
+<p>
+  <%= link_to 'cancel', '/books' %>
+</p>
