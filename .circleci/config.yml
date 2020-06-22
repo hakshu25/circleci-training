@@ -1,58 +1,56 @@
 version: 2.1
-jobs:
-  Hello-World:
+
+executors:
+  test:
     docker:
-      - image: alpine:3.7
+      - image: circleci/ruby:2.6.6
+        environment:
+          RAILS_ENV: "test"
+          DB_USERNAME: "root"
+          DB_PASSWORD: ""
+          DB_SERVERNAME: "127.0.0.1"
+          TZ: "Asia/Tokyo"
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_HOST: "127.0.0.1"
+          MYSQL_USER: "root"
+
+commands:
+  install_dependencies:
     steps:
+      - restore_cache:
+          name: Restore gem dependencies
+          key: v1-circleci-training-gem-{{ checksum "Gemfile.lock" }}
       - run:
-          name: Hello World
-          command: |
-            echo 'Hello World'
-            echo 'This is the delivery pipeline'
-  I-Have-Code:
-    docker:
-      - image: alpine:3.7
-    steps:
-      - checkout
-      - run:
-          name: コードの取得
-          command: |
-            ls -la
-            echo '^^^That should look familiar^^^'
-  Run-With-Node:
-    docker:
-      - image: circleci/node:12.18.1
-    steps:
-      - run:
-          name: Nodeコンテナで実行
-          command: |
-            node -v
-  Now-Complete:
-    docker:
-      - image: alpine:3.7
-    steps:
-      - run:
-          name: 承認の完了
-          command: |
-            echo 'Do work once the approval has completed'
+          name: bundle install
+          command: BUNDLE_GEMFILE=Gemfile bundle install --path vendor/bundle --jobs=4
+      - save_cache:
+          key: v1-circleci-training-gem-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
 
 workflows:
-  version: 2
-  Example_Workflow:
+  test:
     jobs:
-      - Hello-World
-      - I-Have-Code:
-          requires:
-            - Hello-World
-      - Run-With-Node:
-          requires:
-            - Hello-World
-      - Hold-For-Approval:
-          type: approval
-          requires:
-            - Run-With-Node
-            - I-Have-Code
-      - Now-Complete:
-          requires:
-            - Hold-For-Approval
+      - backend-test
+
+jobs:
+  backend-test:
+    executor: test
+    steps:
+      - checkout
+      - install_dependencies
+      - run:
+          name: Wait for db
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 1m -wait-retry-interval 5s
+      - run: mkdir ~/rspec
+      - run:
+          name: Run tests
+          command: |
+            bundle exec rspec --format progress -o ~/rspec/rspec.txt
+      - store_test_results:
+          path: ~/rspec
+      - store_artifacts:
+          path: ~/rspec
 
