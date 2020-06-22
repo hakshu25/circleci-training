@@ -51,7 +51,7 @@ workflows:
           type: approval
           requires:
             - Run-With-Node
-            - I-Have_code
+            - I-Have-Code
       - Now-Complete:
           requires:
             - Hold-For-Approval
