@@ -1,18 +1,58 @@
 version: 2.1
 jobs:
-  build:
+  Hello-World:
     docker:
-      - image: circleci/node:12.18.1
+      - image: alpine:3.7
+    steps:
+      - run:
+          name: Hello World
+          command: |
+            echo 'Hello World'
+            echo 'This is the delivery pipeline'
+  I-Have-Code:
+    docker:
+      - image: alpine:3.7
     steps:
       - checkout
-      - run:
-          name: 最初の一歩
-          command: |
-            echo 'Hello World!'
-            echo 'This is the delivery pipeline'
       - run:
           name: コードの取得
           command: |
             ls -la
             echo '^^^That should look familiar^^^'
+  Run-With-Node:
+    docker:
+      - image: circleci/node:12.18.1
+    steps:
+      - run:
+          name: Nodeコンテナで実行
+          command: |
+            node -v
+  Now-Complete:
+    docker:
+      - image: alpine:3.7
+    steps:
+      - run:
+          name: 承認の完了
+          command: |
+            echo 'Do work once the approval has completed'
+
+workflows:
+  version: 2
+  Example_Workflow:
+    jobs:
+      - Hello-World
+      - I-Have-Code:
+          requires:
+            - Hello-World
+      - Run-With-Node:
+          requires:
+            - Hello-World
+      - Hold-For-Approval:
+          type: approval
+          requires:
+            - Run-With-Node
+            - I-Have_code
+      - Now-Complete:
+          requires:
+            - Hold-For-Approval
 
