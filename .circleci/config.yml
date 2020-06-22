@@ -29,6 +29,14 @@ commands:
           key: v1-circleci-training-gem-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
+  db_setup:
+    steps:
+      - run:
+          name: Wait for db
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 1m -wait-retry-interval 5s
+      - run:
+          name: db setup
+          command: bundle exec rails db:setup RAILS_ENV=test
 
 workflows:
   test:
@@ -41,9 +49,7 @@ jobs:
     steps:
       - checkout
       - install_dependencies
-      - run:
-          name: Wait for db
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 1m -wait-retry-interval 5s
+      - db_setup
       - run: mkdir ~/rspec
       - run:
           name: Run tests
