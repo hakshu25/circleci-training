@@ -1,7 +1,7 @@
 <h1>Books List</h1>
 <ul>
   <% @books.each do |book| %>
-    <li><%= book.title %></li>
+    <li><%= book.title %><%= link_to 'Edit', edit_book_path(book.id) %></li>
   <% end %>
 </ul>
 <%= link_to 'Add a book', '/books/new' %>
