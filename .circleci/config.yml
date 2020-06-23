@@ -17,7 +17,7 @@ executors:
           MYSQL_USER: "root"
 
 commands:
-  install_dependencies:
+  install_gem_dependencies:
     steps:
       - restore_cache:
           name: Restore gem dependencies
@@ -52,6 +52,17 @@ commands:
       - run:
           name: db setup
           command: bundle exec rails db:setup
+  exec_spec:
+    steps:
+      - run: mkdir ~/rspec
+      - run:
+          name: Run tests
+          command: |
+            bundle exec rspec --format progress -o ~/rspec/rspec.xml
+      - store_test_results:
+          path: ~/rspec
+      - store_artifacts:
+          path: ~/rspec
 
 workflows:
   test:
@@ -63,16 +74,7 @@ jobs:
     executor: test
     steps:
       - checkout
-      - install_dependencies
+      - install_gem_dependencies
       - front_setup
       - db_setup
-      - run: mkdir ~/rspec
-      - run:
-          name: Run tests
-          command: |
-            bundle exec rspec --format progress -o ~/rspec/rspec.xml
-      - store_test_results:
-          path: ~/rspec
-      - store_artifacts:
-          path: ~/rspec
-
+      - exec_spec
