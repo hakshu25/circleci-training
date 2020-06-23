@@ -29,6 +29,21 @@ commands:
           key: v1-circleci-training-gem-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
+  front_setup:
+    steps:
+      - restore_cache:
+          name: Restore node_modules dependencies
+          key: v1-circleci-training-node-{{ checksum "yarn.lock" }}
+      - run:
+          name: yarn install
+          command: yarn install --frozen-lockfile
+      - save_cache:
+          key: v1-circleci-training-node-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
+      - run:
+          name: webpacker compile
+          command: bundle exec rails webpacker:compile
   db_setup:
     steps:
       - run:
@@ -36,7 +51,7 @@ commands:
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 1m -wait-retry-interval 5s
       - run:
           name: db setup
-          command: bundle exec rails db:setup RAILS_ENV=test
+          command: bundle exec rails db:setup
 
 workflows:
   test:
@@ -49,12 +64,13 @@ jobs:
     steps:
       - checkout
       - install_dependencies
+      - front_setup
       - db_setup
       - run: mkdir ~/rspec
       - run:
           name: Run tests
           command: |
-            bundle exec rspec --format progress -o ~/rspec/rspec.txt
+            bundle exec rspec --format progress -o ~/rspec/rspec.xml
       - store_test_results:
           path: ~/rspec
       - store_artifacts:
