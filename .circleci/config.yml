@@ -52,9 +52,9 @@ commands:
       - run:
           name: Wait for db
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 1m -wait-retry-interval 5s
-      - run:
-          name: db setup
-          command: bundle exec rails db:setup
+      # - run:
+      #     name: db setup
+      #     command: bundle exec rails db:setup
   exec_spec:
     steps:
       - run: mkdir ~/rspec
