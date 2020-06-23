@@ -83,3 +83,5 @@ jobs:
       - exec_spec
       - slack/status:
           webhook: ${SLACK_WEBHOOK}
+          success_message: ":tada: 成功したよー"
+          failure_message: ":coffee: 失敗。。。確認してね"
